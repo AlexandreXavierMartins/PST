@@ -1,0 +1,86 @@
+import math
+from ypstruct import structure
+inf = math.inf
+
+def gera_sol(Problema, sol):
+  n = Problema.n
+  flag = n*[0]
+  flag[0] = 1 #Indica que a tarefa ZERO já está alocada
+  for i in range(1, n): #Para cada posição do vetor SOL aloca uma tarefa
+    anterior = sol[i-1] #recebe a última tarefa alocada
+    menor = inf
+    best_j = -1
+    for j in range(1, n):    #Percorre as tarefas
+      if(flag[j] == 0): #Somente para as não alocadas
+        if(Problema.tempos[j][anterior] < menor):
+          menor = Problema.tempos[j][anterior]
+          best_j = j
+    if(best_j > 0):
+      sol[i] = best_j
+      flag[best_j] = 1
+  return sol
+
+def calcula_fo(Problema, sol):
+  fo = 0
+  for i in range(1, Problema.n):
+    fo = fo + Problema.tempos[sol[i]][sol[i-1]]
+  return fo
+
+def melhor_vizinho(Problema, sol):
+  best = Problema.inf
+  for i in range(1, Problema.n-1):
+    for j in range(i+1, Problema.n):
+      aux = sol[i]
+      sol[i] = sol[j]
+      sol[j] = aux
+      fo = calcula_fo(Problema, sol)
+      sol[j] = sol[i]
+      sol[i] = aux
+      if(fo < best):
+        best = fo
+        bi = i
+        bj = j
+  return bi, bj, best
+
+def busca_local(Problema, sol):
+  flag = 1
+  fo = calcula_fo(Problema, sol)
+  while flag == 1:
+    flag = 0
+    i, j, val = melhor_vizinho(Problema, sol)
+    if val < fo:
+      aux = sol[i]
+      sol[i] = sol[j]
+      sol[j] = aux
+      fo = val
+      flag = 1
+      print(sol)
+      print(fo)
+
+
+
+Problema = structure()
+Problema.n = 11
+Problema.inf = math.inf
+Problema.tempos = [
+           [1000.0,	1000.0,	1000.0,	1000.0,	1000.0,	1000.0,	1000.0,	1000.0,	1000.0,	1000.0,	1000.0],	
+           [50.0,	1000.0,	13.0,	40.0,	21.0,	2.0,	8.0,	15.0,	24.0,	37.0,	4.0],	
+           [34.0,	6.0,	1000.0,	14.0,	21.0,	31.0,	21.0,	12.0,	42.0,	1.0,	9.0],	
+           [48.0,	5.0,	43.0,	1000.0,	45.0,	43.0,	37.0,	28.0,	20.0,	36.0,	20.0],	
+           [38.0,	44.0,	7.0,	3.0,	1000.0,	21.0,	24.0,	44.0,	48.0,	24.0,	4.0],	
+           [46.0,	11.0,	46.0,	25.0,	13.0,	1000.0,	3.0,	35.0,	37.0,	22.0,	27.0],	
+           [22.0,	2.0,	32.0,	29.0,	23.0,	42.0,	1000.0,	10.0,	32.0,	33.0,	31.0],	
+           [41.0,	10.0,	15.0,	49.0,	44.0,	37.0,	5.0,	1000.0,	50.0,	25.0,	22.0],	
+           [16.0,	12.0,	10.0,	29.0,	16.0,	50.0,	49.0,	14.0,	1000.0,	25.0,	49.0],	
+           [5.0,	19.0,	49.0,	6.0,	23.0,	8.0,	16.0,	46.0,	46.0,	1000.0,	24.0],	
+           [50.0,	28.0,	4.0,	50.0,	26.0,	1.0,	37.0,	23.0,	34.0,	39.0,	1000.0]
+           ] 
+
+sol = Problema.n*[0]
+sol = gera_sol(Problema, sol)
+fo = calcula_fo(Problema, sol)
+
+print(sol)
+print(fo)
+
+busca_local(Problema, sol)
